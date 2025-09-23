@@ -25,10 +25,15 @@ class ConActor(Actor):
         """
         super().__init__(in_feats, len(action_bds))
         self.action_bds = action_bds
+        self.register_buffer("low",  torch.tensor([lo for lo, _ in action_bds], dtype=torch.float32))
+        self.register_buffer("high", torch.tensor([hi for _, hi in action_bds], dtype=torch.float32))
+        scale = (self.high - self.low) / 2.0
+        self.register_buffer("log_scale_sum", torch.log(scale).sum())
 
     def forward(self, x):
         raw_o = super().forward(x)   # [batch, out_feats*2]
         mu, log_sigma = torch.chunk(raw_o, 2, dim=-1)
+        log_sigma = torch.clamp(log_sigma, -20.0, 2.0)### scale explode
         sigma = torch.exp(log_sigma)
 
         # 构建 Normal 分布

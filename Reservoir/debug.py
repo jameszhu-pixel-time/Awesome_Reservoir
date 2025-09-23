@@ -40,7 +40,6 @@ torch.cuda.synchronize() if device == "cuda" else None
 t3 = time.time()
 print("Backward time: {:.6f}s".format(t3 - t2))
 optimizer.zero_grad()
-import ipdb
-ipdb.set_trace()
+
 actions, log_prob, entropy = model(x)
-print(f"results after one step actions (first in batch):{actions[0]}")
+print(f"results after one step actions (first in batch):{torch.mean(actions,dim=0)}")
